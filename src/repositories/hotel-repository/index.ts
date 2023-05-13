@@ -2,7 +2,6 @@ import { prisma } from '@/config';
 
 async function findHotels() {
   const hotels = prisma.hotel.findMany();
-  console.log(hotels);
   return hotels;
 }
 
