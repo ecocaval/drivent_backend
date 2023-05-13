@@ -36,7 +36,7 @@ async function main() {
         cpf: '00000000000',
         birthday: dayjs().toDate(),
         phone: '48999999999',
-        userId: 1,
+        userId: user.id,
       },
     });
   }
