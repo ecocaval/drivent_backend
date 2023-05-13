@@ -6,9 +6,11 @@ import { cannotListHotelsError } from '@/errors/cannot-list-hotels-error';
 
 async function listHotels(userId: number) {
   const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
+
   if (!enrollment) {
     throw notFoundError();
   }
+
   const ticket = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
 
   if (!ticket || ticket.status === 'RESERVED' || ticket.TicketType.isRemote || !ticket.TicketType.includesHotel) {
@@ -20,6 +22,7 @@ async function getHotels(userId: number) {
   await listHotels(userId);
 
   const hotels = await hotelRepository.findHotels();
+
   if (!hotels || hotels.length === 0) {
     throw notFoundError();
   }
