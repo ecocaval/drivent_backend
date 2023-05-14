@@ -75,7 +75,7 @@ async function main() {
       data: {
         enrollmentId: enrollment.id,
         status: 'PAID',
-        ticketTypeId: ticketType.id        
+        ticketTypeId: ticketType.id,
       },
     });
   }
@@ -103,7 +103,7 @@ async function main() {
         const room = await prisma.room.create({
           data: {
             name: `Room ${i}`,
-            capacity: 2,
+            capacity: Math.ceil((Math.random() * 10) / 4),
             hotelId: hotels[h].id,
           },
         });
