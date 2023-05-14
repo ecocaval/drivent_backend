@@ -101,7 +101,7 @@ async function main() {
           ticketTypeId: ticketType.id,
         },
       });
-      tickets.push(ticket)
+      tickets.push(ticket);
     }
   }
 
@@ -134,10 +134,23 @@ async function main() {
     }
   }
 
-  // const bookings = await prisma.booking.findMany();
-  // if (!bookings[0]) {
-
-  // }
+  const bookings = await prisma.booking.findMany();
+  if (!bookings[0]) {
+    for (let i = 0; i < rooms.length; i++) {
+      // Coloquei isso aqui pras reservas não ficarem excessivas e serem aleatórias
+      if ((i % 2 === 0) || i / 3 === 1 || i / 4 === 0) {
+        continue;
+      }
+      const completeUsers = await prisma.user.findMany();
+      const booking = await prisma.booking.create({
+        data: {
+          roomId: rooms[Math.floor(Math.random() * rooms.length)].id,
+          userId: completeUsers[Math.floor(Math.random() * completeUsers.length)].id,
+        },
+      });
+      bookings.push(booking);
+    }
+  }
 
   console.log({ event });
   console.log({ user });
@@ -145,7 +158,7 @@ async function main() {
   console.log({ ticketType });
   console.log({ hotels });
   console.log({ rooms });
-  // console.log({ bookings });
+  console.log({ bookings });
 }
 
 main()
