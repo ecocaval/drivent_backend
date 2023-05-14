@@ -103,7 +103,7 @@ async function main() {
         const room = await prisma.room.create({
           data: {
             name: `Room ${i}`,
-            capacity: Math.ceil((Math.random() * 10) / 4),
+            capacity: h % 2 === 0 ? Math.ceil((Math.random() * 10) / 4) : 1,
             hotelId: hotels[h].id,
           },
         });
