@@ -29,7 +29,6 @@ async function main() {
   }
 
   let enrollment = await prisma.enrollment.findFirst();
-  console.log(enrollment);
   if (!enrollment) {
     enrollment = await prisma.enrollment.create({
       data: {
