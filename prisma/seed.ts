@@ -1,6 +1,7 @@
-import { Hotel, PrismaClient, Room } from '@prisma/client';
+import { Hotel, Prisma, PrismaClient, Room, User } from '@prisma/client';
 import dayjs from 'dayjs';
 import bcrypt from 'bcrypt';
+import { HOTEL_IMAGES_URLS_TEMPLATE } from './utils/hotelImagesUrls';
 
 const prisma = new PrismaClient();
 
@@ -19,41 +20,63 @@ async function main() {
   }
 
   let user = await prisma.user.findFirst();
+  let users = [
+    {
+      email: 'erico@erico.com',
+      password: bcrypt.hashSync('erico', 12),
+    },
+    {
+      email: 'monique@monique.com',
+      password: bcrypt.hashSync('monique', 12),
+    },
+    {
+      email: 'ottoniel@ottoniel.com',
+      password: bcrypt.hashSync('ottoniel', 12),
+    },
+    {
+      email: 'juan@juan.com',
+      password: bcrypt.hashSync('juan', 12),
+    },
+  ];
   if (!user) {
-    user = await prisma.user.create({
-      data: {
-        email: 'teste@teste.com',
-        password: bcrypt.hashSync('teste', 12),
-      },
+    await prisma.user.createMany({
+      data: users,
     });
   }
 
-  let enrollment = await prisma.enrollment.findFirst();
-  if (!enrollment) {
-    enrollment = await prisma.enrollment.create({
-      data: {
-        name: 'teste',
-        cpf: '00000000000',
-        birthday: dayjs().toDate(),
-        phone: '48999999999',
-        userId: user.id,
-      },
-    });
+  let enrollments = await prisma.enrollment.findMany();
+  if (!enrollments[0]) {
+    const completeUsers = await prisma.user.findMany();
+    for (let i = 0; i < completeUsers.length; i++) {
+      const firstName = completeUsers[i].email.split('@')[0];
+      const enrollment = await prisma.enrollment.create({
+        data: {
+          name: `${firstName}_enrollment`,
+          cpf: '00000000000',
+          birthday: dayjs().toDate(),
+          phone: '48999999999',
+          userId: completeUsers[i].id,
+        },
+      });
+      enrollments.push(enrollment);
+    }
   }
 
   let address = await prisma.address.findFirst();
   if (!address) {
-    address = await prisma.address.create({
-      data: {
-        street: 'Rua Desembargador Vitor Lima',
-        number: '354',
-        cep: '88040400',
-        city: 'Florianopolis',
-        neighborhood: 'Trindade',
-        state: 'SC',
-        enrollmentId: enrollment.id,
-      },
-    });
+    for (let i = 0; i < enrollments.length; i++) {
+      address = await prisma.address.create({
+        data: {
+          street: 'Rua Desembargador Vitor Lima',
+          number: '354',
+          cep: '88040400',
+          city: 'Florianopolis',
+          neighborhood: 'Trindade',
+          state: 'SC',
+          enrollmentId: enrollments[i].id,
+        },
+      });
+    }
   }
 
   let ticketType = await prisma.ticketType.findFirst();
@@ -68,34 +91,34 @@ async function main() {
     });
   }
 
-  let ticket = await prisma.ticket.findFirst();
-  if (!ticket) {
-    ticket = await prisma.ticket.create({
-      data: {
-        enrollmentId: enrollment.id,
-        status: 'PAID',
-        ticketTypeId: ticketType.id,
-      },
-    });
+  let tickets = await prisma.ticket.findMany();
+  if (!tickets[0]) {
+    for (let i = 0; i < enrollments.length; i++) {
+      const ticket = await prisma.ticket.create({
+        data: {
+          enrollmentId: enrollments[i].id,
+          status: 'PAID',
+          ticketTypeId: ticketType.id,
+        },
+      });
+      tickets.push(ticket)
+    }
   }
 
-  const hotel = await prisma.hotel.findFirst();
-  const hotels: Hotel[] = [];
-  if (!hotel)
+  const hotels = await prisma.hotel.findMany();
+  if (!hotels[0])
     for (let i = 0; i < 10; i++) {
       const hotel = await prisma.hotel.create({
         data: {
           name: `Hotel ${i}`,
-          image:
-            'https://media.istockphoto.com/id/104731717/photo/luxury-resort.jpg?s=612x612&w=0&k=20&c=cODMSPbYyrn1FHake1xYz9M8r15iOfGz9Aosy9Db7mI=',
+          image: HOTEL_IMAGES_URLS_TEMPLATE[Math.floor(Math.random() * 10)],
         },
       });
       hotels.push(hotel);
     }
 
-  const room = await prisma.room.findFirst();
-  const rooms: Room[] = [];
-  if (!room) {
+  const rooms = await prisma.room.findMany();
+  if (!rooms[0]) {
     const hotels = await prisma.hotel.findMany();
     for (let h = 0; h < hotels.length; h++) {
       for (let i = 1; i <= 10; i++) {
@@ -111,12 +134,18 @@ async function main() {
     }
   }
 
+  // const bookings = await prisma.booking.findMany();
+  // if (!bookings[0]) {
+
+  // }
+
   console.log({ event });
   console.log({ user });
-  console.log({ enrollment });
+  console.log({ enrollments });
   console.log({ ticketType });
   console.log({ hotels });
   console.log({ rooms });
+  // console.log({ bookings });
 }
 
 main()
