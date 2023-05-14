@@ -1,10 +1,10 @@
 import { Hotel, PrismaClient, Room } from '@prisma/client';
 import dayjs from 'dayjs';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
-
   let event = await prisma.event.findFirst();
   if (!event) {
     event = await prisma.event.create({
@@ -23,12 +23,13 @@ async function main() {
     user = await prisma.user.create({
       data: {
         email: 'teste@teste.com',
-        password: 'teste',
+        password: bcrypt.hashSync('teste', 12),
       },
     });
   }
 
   let enrollment = await prisma.enrollment.findFirst();
+  console.log(enrollment);
   if (!enrollment) {
     enrollment = await prisma.enrollment.create({
       data: {
@@ -41,29 +42,41 @@ async function main() {
     });
   }
 
-  let ticketTypes = await prisma.ticketType.findFirst();
-  if (!ticketTypes) {
-    await prisma.ticketType.createMany({
-      data: [
-        {
-          name: 'Não gosto de gente',
-          price: 300,
-          isRemote: false,
-          includesHotel: false,
-        },
-        {
-          name: 'Curtida rápida',
-          price: 500,
-          isRemote: true,
-          includesHotel: false,
-        },
-        {
-          name: 'ComboFull',
-          price: 700,
-          isRemote: true,
-          includesHotel: true,
-        },
-      ],
+  let address = await prisma.address.findFirst();
+  if (!address) {
+    address = await prisma.address.create({
+      data: {
+        street: 'Rua Desembargador Vitor Lima',
+        number: '354',
+        cep: '88040400',
+        city: 'Florianopolis',
+        neighborhood: 'Trindade',
+        state: 'SC',
+        enrollmentId: enrollment.id,
+      },
+    });
+  }
+
+  let ticketType = await prisma.ticketType.findFirst();
+  if (!ticketType) {
+    ticketType = await prisma.ticketType.create({
+      data: {
+        name: 'TICKET TYPE CORRETO',
+        price: 300,
+        isRemote: false,
+        includesHotel: true,
+      },
+    });
+  }
+
+  let ticket = await prisma.ticket.findFirst();
+  if (!ticket) {
+    ticket = await prisma.ticket.create({
+      data: {
+        enrollmentId: enrollment.id,
+        status: 'PAID',
+        ticketTypeId: ticketType.id        
+      },
     });
   }
 
@@ -93,7 +106,7 @@ async function main() {
             capacity: 2,
             hotelId: hotels[h].id,
           },
-        });        
+        });
         rooms.push(room);
       }
     }
@@ -102,7 +115,7 @@ async function main() {
   console.log({ event });
   console.log({ user });
   console.log({ enrollment });
-  console.log({ ticketTypes });
+  console.log({ ticketType });
   console.log({ hotels });
   console.log({ rooms });
 }
