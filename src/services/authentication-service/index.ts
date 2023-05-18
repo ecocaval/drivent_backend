@@ -1,6 +1,8 @@
 import { User } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { v4 as uuidv4 } from 'uuid';
+import userService from '../users-service';
 import { invalidCredentialsError } from './errors';
 import { exclude } from '@/utils/prisma-utils';
 import userRepository from '@/repositories/user-repository';
@@ -43,6 +45,24 @@ async function validatePasswordOrFail(password: string, userPassword: string) {
   if (!isPasswordValid) throw invalidCredentialsError();
 }
 
+async function checkIfUserExists(login: string): Promise<SignInResult> {
+  const gitHubEmail = login + '@github.com';
+  const userExists = await userRepository.findByEmail(gitHubEmail);
+
+  if (!userExists) {
+    const password = uuidv4();
+    await userService.createUser({ email: gitHubEmail, password });
+  }
+
+  const user = await userRepository.findByEmail(gitHubEmail);
+  const token = await createSession(user.id);
+
+  return {
+    user: exclude(user, 'password'),
+    token,
+  };
+}
+
 export type SignInParams = Pick<User, 'email' | 'password'>;
 
 type SignInResult = {
@@ -54,6 +74,7 @@ type GetUserOrFailResult = Pick<User, 'id' | 'email' | 'password'>;
 
 const authenticationService = {
   signIn,
+  checkIfUserExists,
 };
 
 export default authenticationService;
