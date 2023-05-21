@@ -20,11 +20,8 @@ export async function signInGitHub(req: Request, res: Response) {
   console.log(req.body.code);
   try {
     const token = await exchangeCodeForAccessToken(req.body.code);
-    console.log(token);
 
     const user = await fetchUser(token);
-
-    console.log(user.login);
 
     const result = await authenticationService.checkIfUserExists(user.login);
 
@@ -54,7 +51,6 @@ async function exchangeCodeForAccessToken(code: string) {
   });
 
   const token = data.split('&')[0].split('=')[1];
-  console.log(token);
   return token;
 }
 
@@ -65,7 +61,6 @@ async function fetchUser(token: string) {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(user);
     return user;
   } catch (error) {
     throw unauthorizedError();
