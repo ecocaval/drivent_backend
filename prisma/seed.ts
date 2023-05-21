@@ -81,14 +81,27 @@ async function main() {
 
   let ticketType = await prisma.ticketType.findFirst();
   if (!ticketType) {
-    ticketType = await prisma.ticketType.create({
-      data: {
-        name: 'TICKET TYPE CORRETO',
+    let ticketType = await prisma.ticketType.createMany({
+      data: [{
+        name: 'Online',
         price: 300,
+        isRemote: true,
+        includesHotel: false,
+      },
+      {
+        name: 'Presencial',
+        price: 500,
+        isRemote: false,
+        includesHotel: false,
+      },
+      {
+        name: 'Presencial',
+        price: 700,
         isRemote: false,
         includesHotel: true,
-      },
+      },]
     });
+    return ticketType
   }
 
   let tickets = await prisma.ticket.findMany();
