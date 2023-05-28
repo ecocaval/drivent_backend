@@ -21,6 +21,9 @@ export async function listHotelBookings(req: AuthenticatedRequest, res: Response
   try {
     const { hotelId } = req.params;
     const hotelBookings = await bookingService.getHotelBookings(+hotelId);
+    if (hotelBookings.length === 0) {
+      return res.status(httpStatus.NOT_FOUND).send('No bookings found for the provided hotelId');
+    }
     return res.status(httpStatus.OK).send(hotelBookings);
   } catch (error) {
     next(error);
