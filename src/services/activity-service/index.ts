@@ -39,6 +39,7 @@ async function getActivitiesDate() {
       d++;
     }
     dates.push({ id: e.id, weekDay: e.weekDay, month: d, monthDay: e.monthDay });
+    d = 1;
   }
   return dates;
 }
