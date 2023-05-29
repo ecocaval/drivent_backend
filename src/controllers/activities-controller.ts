@@ -12,3 +12,14 @@ export async function getActivities(req: AuthenticatedRequest, res: Response, ne
     next(error);
   }
 }
+
+export async function getActivitiesDate(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  const { id } = req.params;
+  try {
+    const date = await activitiesService.getActivitiesDate(Number(id));
+
+    return res.status(httpStatus.OK).send(date);
+  } catch (error) {
+    next(error);
+  }
+}

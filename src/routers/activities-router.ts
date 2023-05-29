@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { getActivities } from '@/controllers';
+import { getActivities, getActivitiesDate } from '@/controllers';
 
 const activitiesRouter = Router();
 
-activitiesRouter.get('/', getActivities);
+activitiesRouter.get('/', getActivities).get('/dates/:id', getActivitiesDate);
 
 export { activitiesRouter };
