@@ -1,4 +1,4 @@
-import { Hotel, Prisma, PrismaClient, Room, User } from '@prisma/client';
+import { ActivityLocation, Hotel, Month, Prisma, PrismaClient, Room, User, WeekDays } from '@prisma/client';
 import dayjs from 'dayjs';
 import bcrypt from 'bcrypt';
 import { HOTEL_IMAGES_URLS_TEMPLATE } from './utils/hotelImagesUrls';
@@ -36,6 +36,10 @@ async function main() {
     {
       email: 'juan@juan.com',
       password: bcrypt.hashSync('juan', 12),
+    },
+    {
+      email: 'teste@teste.com',
+      password: bcrypt.hashSync('teste', 12),
     },
   ];
   if (!user) {
@@ -165,6 +169,94 @@ async function main() {
     }
   }
 
+  const activityDates = await prisma.activityDate.findMany();
+  if (!activityDates[0]) {
+    
+    const weekDays = [
+      WeekDays.MONDAY,
+      WeekDays.TUESDAY,
+      WeekDays.WEDNESDAY,
+      WeekDays.THURSDAY,
+      WeekDays.FRIDAY,
+      WeekDays.SATURDAY,
+      WeekDays.SUNDAY
+    ]
+
+    const months = [
+      Month.JANUARY,
+      Month.FEBRUARY,
+      Month.MARCH,
+      Month.APRIL,
+      Month.MAY,
+      Month.JUNE,
+      Month.JULY
+    ]
+
+    for (let i = 0; i < 7; i++) {
+      const date = await prisma.activityDate.create({
+        data: {
+          weekDay: weekDays[i],
+          month: months[i]
+        },
+      });
+      activityDates.push(date);
+    }
+  }
+
+  const activities = await prisma.activity.findMany();
+  if (!activities[0]) {
+    
+    const activityLocations = [
+      ActivityLocation.MAIN,
+      ActivityLocation.LATERAL,
+      ActivityLocation.WORKSHOP
+    ]
+
+    const activityNames = [
+      "Minecraft: a saga",
+      "Montando o pc ideal no lolzinho",
+      "Palestra sobre cultura",
+      "Discussão Java",
+      "Jogue RPGs",
+      "Aula de nataçao"
+    ]
+
+    const dates = await prisma.activityDate.findMany();
+
+    for (let i = 0; i < 6; i++) {
+      const startTime = Math.floor((Math.random() * 10))
+      const slotsSelector = Math.floor((Math.random() * 20))
+      const oneToThreeSelector = (Math.floor((Math.random() * 10)/3))
+      const date = await prisma.activity.create({
+        data: {
+          name: activityNames[i],
+          location: activityLocations[oneToThreeSelector],
+          startsAt: startTime,
+          endsAt: startTime + oneToThreeSelector,
+          slots: i != 4 ? slotsSelector : 1,
+          dateId: dates[oneToThreeSelector * 2].id,
+        },
+      });
+      activities.push(date);
+    }
+  }
+
+  const userActivities = await prisma.userActivity.findMany();
+  if (!userActivities[0]) {
+
+    let freeSlotsActivity = await prisma.activity.findMany();
+
+    const [activity] = freeSlotsActivity?.filter(a => a.slots < 1)
+
+    const date = await prisma.userActivity.create({
+      data: {
+        userId: 0,
+        activityId: activity.id
+      },
+    });
+    userActivities.push(date);
+  }
+
   console.log({ event });
   console.log({ user });
   console.log({ enrollments });
@@ -172,6 +264,8 @@ async function main() {
   console.log({ hotels });
   console.log({ rooms });
   console.log({ bookings });
+  console.log({ activityDates });
+  console.log({ userActivities })
 }
 
 main()
