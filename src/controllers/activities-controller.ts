@@ -26,6 +26,7 @@ export async function getActivitiesDate(req: AuthenticatedRequest, res: Response
 export async function UserSelectActivity(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const { userId } = req;
   const { activityId } = req.params;
+
   try {
     const select = await activitiesService.UserSelectActivity(userId, Number(activityId));
 
