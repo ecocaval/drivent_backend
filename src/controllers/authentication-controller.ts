@@ -17,7 +17,6 @@ export async function singInPost(req: Request, res: Response) {
 }
 
 export async function signInGitHub(req: Request, res: Response) {
-  console.log(req.body.code);
   try {
     const token = await exchangeCodeForAccessToken(req.body.code);
 
