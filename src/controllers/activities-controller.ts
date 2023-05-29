@@ -22,3 +22,15 @@ export async function getActivitiesDate(req: AuthenticatedRequest, res: Response
     next(error);
   }
 }
+
+export async function UserSelectActivity(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  const { userId } = req;
+  const { activityId } = req.params;
+  try {
+    const select = await activitiesService.UserSelectActivity(userId, Number(activityId));
+
+    return res.status(httpStatus.OK).send(select);
+  } catch (error) {
+    next(error);
+  }
+}
