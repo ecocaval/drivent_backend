@@ -163,6 +163,7 @@ model ActivityDate {
   id       Int        @id() @default(autoincrement())
   weekDay  WeekDays
   month    Month       
+  monthDay Int
   Activity Activity[]
 }
 

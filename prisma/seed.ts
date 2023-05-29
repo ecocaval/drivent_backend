@@ -196,6 +196,7 @@ async function main() {
       const date = await prisma.activityDate.create({
         data: {
           weekDay: weekDays[i],
+          monthDay: Number(i),
           month: months[i]
         },
       });
@@ -246,13 +247,14 @@ async function main() {
   if (!userActivities[0]) {
 
     let freeSlotsActivity = await prisma.activity.findMany();
+    let [user] = await prisma.user.findMany();
 
     const [activity] = freeSlotsActivity?.filter(a => a.slots < 1)
 
-    if(activity) {
+    if(activity && user) {
       const date = await prisma.userActivity.create({
         data: {
-          userId: 0,
+          userId: user.id,
           activityId: activity.id
         },
       });
