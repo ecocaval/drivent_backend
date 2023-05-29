@@ -3,6 +3,6 @@ import { getActivities, getActivitiesDate } from '@/controllers';
 
 const activitiesRouter = Router();
 
-activitiesRouter.get('/', getActivities).get('/dates/:id', getActivitiesDate);
+activitiesRouter.get('/', getActivities).get('/dates', getActivitiesDate);
 
 export { activitiesRouter };

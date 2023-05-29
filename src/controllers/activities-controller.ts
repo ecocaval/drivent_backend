@@ -14,9 +14,8 @@ export async function getActivities(req: AuthenticatedRequest, res: Response, ne
 }
 
 export async function getActivitiesDate(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-  const { id } = req.params;
   try {
-    const date = await activitiesService.getActivitiesDate(Number(id));
+    const date = await activitiesService.getActivitiesDate();
 
     return res.status(httpStatus.OK).send(date);
   } catch (error) {

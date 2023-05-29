@@ -14,9 +14,9 @@ async function getActivities() {
   return activities;
 }
 
-async function getActivitiesDate(id: number) {
-  const date = await activitiesRepository.getActivitiesDate(id);
-  if (!date) throw notFoundError();
+async function getActivitiesDate() {
+  const date = await activitiesRepository.getActivitiesDate();
+  if (!date || date.length === 0) throw notFoundError();
   const month = [
     'JANUARY',
     'FEBRUARY',
@@ -31,16 +31,17 @@ async function getActivitiesDate(id: number) {
     'NOVEMBER',
     'DECEMBER',
   ];
-  let d;
-  for (let i = 0; i < month.length; i++) {
-    if (date.month == month[i]) d = i + 1;
+  let d = 1;
+  const dates = [];
+  for (const e of date) {
+    for (const value of month) {
+      if (e.month === value) break;
+      d++;
+    }
+    dates.push({ id: e.id, weekDay: e.weekDay, month: d, monthDay: e.monthDay });
+    d = 1;
   }
-  return {
-    id: date.id,
-    weekDay: date.weekDay,
-    month: d,
-    monthDay: date.monthDay,
-  };
+  return dates;
 }
 
 const activitiesService = {

@@ -4,8 +4,8 @@ async function getActivities() {
   return prisma.activity.findMany();
 }
 
-async function getActivitiesDate(id: number) {
-  return prisma.activityDate.findUnique({ where: { id } });
+async function getActivitiesDate() {
+  return prisma.activityDate.findMany();
 }
 
 const activitiesRepository = {
