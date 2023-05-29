@@ -33,7 +33,7 @@ npm run dev:seed
 
 ```bash
 npm run dev
-```
+```   
 
 ## How to run tests
 
