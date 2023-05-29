@@ -49,10 +49,16 @@ async function UserSelectActivity(userId: number, activityId: number) {
   return select;
 }
 
+async function getUserSelections(userId: number) {
+  const user = await activitiesRepository.getUserSelections(userId);
+  return user;
+}
+
 const activitiesService = {
   getActivities,
   getActivitiesDate,
   UserSelectActivity,
+  getUserSelections,
 };
 
 export default activitiesService;
