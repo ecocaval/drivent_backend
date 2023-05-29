@@ -435,3 +435,62 @@ describe('PUT /booking', () => {
     });
   });
 });
+
+describe('GET booking/hotel/:hotelId', () => {
+  it('should respond with status 401 if no token is given', async () => {
+    const response = await server.get('/booking/hotel/1');
+
+    expect(response.status).toBe(httpStatus.UNAUTHORIZED);
+  });
+
+  it('should respond with status 401 if given token is not valid', async () => {
+    const token = faker.lorem.word();
+
+    const response = await server.get('/booking/hotel/1').set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(httpStatus.UNAUTHORIZED);
+  });
+
+  it('should respond with status 401 if there is no session for given token', async () => {
+    const userWithoutSession = await createUser();
+    const token = jwt.sign({ userId: userWithoutSession.id }, process.env.JWT_SECRET);
+
+    const response = await server.get('/booking/hotel/1').set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(httpStatus.UNAUTHORIZED);
+  });
+
+  describe('when token is valid', () => {
+    it('should return hotel bookings when a valid hotelId is provided', async () => {
+      const user = await createUser();
+      const token = await generateValidToken(user);
+
+      const hotel = await createHotel();
+      const room = await createRoomWithHotelId(hotel.id);
+      await createBooking({
+        userId: user.id,
+        roomId: room.id,
+      });
+      await createBooking({
+        userId: user.id,
+        roomId: room.id,
+      });
+
+      const response = await server.get(`/booking/hotel/${hotel.id}`).set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).toBe(httpStatus.OK);
+      expect(response.body.length).toBe(1);
+    });
+
+    it('should return 404 Not Found if no bookings are found for the provided hotelId', async () => {
+      const user = await createUser();
+      const token = await generateValidToken(user);
+
+      const hotel = await createHotel();
+
+      const response = await server.get(`/booking/hotel/${hotel.id}`).set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).toBe(httpStatus.NOT_FOUND);
+    });
+  });
+});
