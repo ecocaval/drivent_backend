@@ -170,7 +170,7 @@ async function main() {
   }
 
   const activityDates = await prisma.activityDate.findMany();
-  if (!activityDates[0]) {
+  if (!activityDates[0]) {    
     
     const weekDays = [
       WeekDays.MONDAY,
@@ -204,6 +204,7 @@ async function main() {
   }
 
   const activities = await prisma.activity.findMany();
+
   if (!activities[0]) {
     
     const activityLocations = [
@@ -248,13 +249,15 @@ async function main() {
 
     const [activity] = freeSlotsActivity?.filter(a => a.slots < 1)
 
-    const date = await prisma.userActivity.create({
-      data: {
-        userId: 0,
-        activityId: activity.id
-      },
-    });
-    userActivities.push(date);
+    if(activity) {
+      const date = await prisma.userActivity.create({
+        data: {
+          userId: 0,
+          activityId: activity.id
+        },
+      });
+      userActivities.push(date);
+    }
   }
 
   console.log({ event });
