@@ -44,9 +44,15 @@ async function getActivitiesDate() {
   return dates;
 }
 
+async function UserSelectActivity(userId: number, activityId: number) {
+  const select = await activitiesRepository.UserSelectActivity({ userId, activityId });
+  return select;
+}
+
 const activitiesService = {
   getActivities,
   getActivitiesDate,
+  UserSelectActivity,
 };
 
 export default activitiesService;
